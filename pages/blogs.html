@@ -60,46 +60,158 @@
     </section>
     <section style="padding-bottom:2rem;">
       <h2 class="text-xl font-semibold section-title">Blog Posts</h2>
-      <p class="mt-2 muted text-sm">Click a card to expand the full post.</p>
+      <p class="mt-2 muted text-sm">Click a card to read the full post.</p>
       <div class="blog-grid">
-        <article class="blog-card" data-blog="b1" role="button" tabindex="0" aria-label="Open blog post 1">
-          <div class="blog-thumb"><div class="thumb-inner"><div class="thumb-mark">CTF</div></div></div>
+        <article class="blog-card" data-blog="b1" role="button" tabindex="0" aria-label="Open DLL Injection post">
+          <div class="blog-thumb"><div class="thumb-inner"><div class="thumb-mark">DLL</div></div></div>
           <div class="blog-meta">
-            <span class="blog-tag">Best Practices</span>
-            <h3 class="blog-title">Notes from my first CTF week</h3>
-            <p class="blog-excerpt">A simple checklist I used: recon, enumerate, exploit, write notes. What worked and what did not.</p>
-          </div>
-        </article>
-        <article class="blog-card" data-blog="b2" role="button" tabindex="0" aria-label="Open blog post 2">
-          <div class="blog-thumb"><div class="thumb-inner"><div class="thumb-mark">WEB</div></div></div>
-          <div class="blog-meta">
-            <span class="blog-tag">Web Security</span>
-            <h3 class="blog-title">My Burp Suite workflow (beginner)</h3>
-            <p class="blog-excerpt">How I use Repeater, Intruder, and extensions without overcomplicating things.</p>
-          </div>
-        </article>
-        <article class="blog-card" data-blog="b3" role="button" tabindex="0" aria-label="Open blog post 3">
-          <div class="blog-thumb"><div class="thumb-inner"><div class="thumb-mark">SIEM</div></div></div>
-          <div class="blog-meta">
-            <span class="blog-tag">Learning</span>
-            <h3 class="blog-title">ELK basics: logs, queries, and dashboards</h3>
-            <p class="blog-excerpt">A beginner-friendly overview of what I practiced and the commands I keep coming back to.</p>
+            <span class="blog-tag">Windows Internals</span>
+            <h3 class="blog-title">DLL Injection: How Attackers Execute Code in Trusted Windows Processes</h3>
+            <p class="blog-excerpt">A step-by-step breakdown of classic DLL injection using Windows APIs, with a live demonstration inside an isolated VM - including real screenshots of every stage.</p>
+            <div style="margin-top:.75rem;display:flex;flex-wrap:wrap;gap:.4rem;">
+              <span class="tag">Malware Analysis</span><span class="tag">Blue Team</span><span class="tag">EDR</span><span class="tag">Windows</span>
+            </div>
           </div>
         </article>
       </div>
-      <div class="blog-expand" id="blog-expand" hidden style="margin-top:2rem;">
-        <div class="blog-expand-head">
-          <h3 class="text-xl font-semibold section-title" id="blog-expand-title"></h3>
-          <button class="btn btn-ghost btn-sm" id="blog-expand-close" type="button">Close</button>
-        </div>
-        <div class="blog-expand-body" id="blog-expand-body"></div>
-      </div>
-      <template id="blog-b1"><p class="muted">A summary of my first week tackling CTF challenges and the workflow that helped me stay focused.</p><h4 style="margin-top:1.25rem;font-weight:600;color:var(--text);">What I practiced</h4><ul style="margin-top:.6rem;padding-left:1.1rem;list-style:disc;display:grid;gap:.4rem;"><li class="muted text-sm">Recon and enumeration (small, repeatable steps)</li><li class="muted text-sm">Keeping clean notes (payloads, endpoints, assumptions)</li><li class="muted text-sm">Writing a short summary after each solve</li></ul></template>
-      <template id="blog-b2"><p class="muted">A simple breakdown of how I set up and use Burp Suite without drowning in options.</p><h4 style="margin-top:1.25rem;font-weight:600;color:var(--text);">My workflow</h4><ol style="margin-top:.6rem;padding-left:1.1rem;list-style:decimal;display:grid;gap:.4rem;"><li class="muted text-sm">Intercept, send to Repeater</li><li class="muted text-sm">Test inputs and encode carefully</li><li class="muted text-sm">Save useful requests as examples for later</li></ol></template>
-      <template id="blog-b3"><p class="muted">Getting started with ELK - parsing logs, running queries, and building a simple dashboard.</p><h4 style="margin-top:1.25rem;font-weight:600;color:var(--text);">What I learned</h4><ul style="margin-top:.6rem;padding-left:1.1rem;list-style:disc;display:grid;gap:.4rem;"><li class="muted text-sm">Parsing logs into structured fields</li><li class="muted text-sm">Basic search queries and filters in Kibana</li><li class="muted text-sm">Turning findings into a simple dashboard</li></ul></template>
     </section>
   </div>
 </main>
+
+<!-- FULL-PAGE BLOG MODAL -->
+<div id="blog-modal" class="blog-modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="blog-modal-inner">
+    <div class="blog-modal-header">
+      <h2 id="modal-title" class="blog-modal-title"></h2>
+      <button id="modal-close" class="btn btn-ghost btn-sm" type="button">&#x2715;&nbsp; Close</button>
+    </div>
+    <div id="modal-body" class="blog-modal-body"></div>
+  </div>
+</div>
+
+<template id="blog-b1">
+  <div class="post-content">
+
+    <div class="post-disclaimer">
+      ⚠️ Everything demonstrated in this post was performed inside an isolated Windows 10 virtual machine for educational purposes only. Never attempt this on systems you do not own or have explicit permission to test.
+    </div>
+
+    <h3 class="post-h2">Introduction</h3>
+    <p class="muted leading-relaxed">Most people think malware always brings something new into a system, something suspicious that triggers defenders.</p>
+    <p class="muted leading-relaxed">What if it doesn't have to? What if malicious code could run inside a process you already trust like Notepad, or a core Windows service, without introducing anything obviously suspicious from the outside?</p>
+    <p class="muted leading-relaxed">That is exactly what DLL injection does. It is one of the most widely used techniques in real-world attacks, red team operations, and security research. Understanding it is fundamental to understanding modern endpoint threats.</p>
+
+    <h3 class="post-h2">What is a DLL?</h3>
+    <p class="muted leading-relaxed">A DLL (Dynamic Link Library) is a file containing shared code and data that multiple programs can load and use simultaneously. Instead of every program bundling its own copy of every function it needs, Windows stores commonly used functionality inside DLL files that live on the system.</p>
+    <ul class="post-list">
+      <li>Memory efficiency - one copy of shared code loaded once, used by many processes simultaneously</li>
+      <li>Modular architecture - components can be updated independently without rebuilding everything</li>
+      <li>Code reuse - developers write functionality once and every program that needs it simply loads it</li>
+    </ul>
+    <p class="muted leading-relaxed">That elegance, however, also creates a surface that attackers have been exploiting for decades.</p>
+
+    <h3 class="post-h2">What is DLL Injection?</h3>
+    <p class="muted leading-relaxed">DLL injection is the technique of forcing a legitimate running process to load a DLL it never intended to load. An attacker manipulates a trusted running process from the outside, writing a malicious DLL into its memory space and forcing it to execute that code.</p>
+    <p class="muted leading-relaxed">Once loaded, the malicious code runs inside the trusted process. Same name. Same PID. Same location on disk. The only change is what is running inside its memory.</p>
+
+    <h3 class="post-h2">Why Do Attackers Use It?</h3>
+    <ul class="post-list">
+      <li><strong style="color:var(--text);">Stealth through trust</strong> - Security tools monitoring by process name will see svchost.exe or notepad.exe. The malicious activity happening inside is much harder to attribute.</li>
+      <li><strong style="color:var(--text);">Inherited privileges</strong> - The injected DLL inherits the full permissions of the host process. Inject into a high-privilege process and your code runs with those same elevated privileges.</li>
+      <li><strong style="color:var(--text);">Bypassing security controls</strong> - Many policies whitelist trusted system processes. Operating from inside one bypasses controls that would catch standalone malicious executables.</li>
+      <li><strong style="color:var(--text);">Persistence and monitoring</strong> - Once loaded inside a long-running process, a DLL can silently monitor activity, intercept function calls, or exfiltrate data.</li>
+    </ul>
+
+    <h3 class="post-h2">How DLL Injection Works - Step by Step</h3>
+    <p class="muted leading-relaxed">Classic DLL injection uses a specific sequence of Windows API calls. The diagram below shows the complete attack flow:</p>
+
+    <figure class="post-figure centered">
+      <img src="../public/blog/attack_flow.png" alt="DLL Injection attack flow diagram" class="post-img" style="max-width:560px;" />
+      <figcaption>Complete attack flow - from selecting the target process to malicious DLL executing inside trusted process memory.</figcaption>
+    </figure>
+
+    <h4 class="post-h3">Step 1 - Identify the Target Process</h4>
+    <p class="muted leading-relaxed">The attacker selects a legitimate running process. Common targets include svchost.exe, explorer.exe, or notepad.exe. <code class="post-code">CreateToolhelp32Snapshot()</code> is used to enumerate all running processes and find the target PID.</p>
+
+    <h4 class="post-h3">Step 2 - OpenProcess()</h4>
+    <pre class="post-pre">OpenProcess(PROCESS_ALL_ACCESS, FALSE, targetPID)</pre>
+    <p class="muted leading-relaxed">Opens a handle to the target process - a reference that grants permission to interact with and manipulate it. Requires administrator rights.</p>
+
+    <h4 class="post-h3">Step 3 - VirtualAllocEx()</h4>
+    <pre class="post-pre">VirtualAllocEx(hProcess, NULL, pathSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE)</pre>
+    <p class="muted leading-relaxed">Allocates a region of memory inside the target process's own address space to hold the DLL path string.</p>
+
+    <h4 class="post-h3">Step 4 - WriteProcessMemory()</h4>
+    <pre class="post-pre">WriteProcessMemory(hProcess, allocatedAddr, dllPath, pathSize, &amp;bytesWritten)</pre>
+    <p class="muted leading-relaxed">Writes the full file path of the malicious DLL into the allocated memory region inside the target process.</p>
+
+    <h4 class="post-h3">Step 5 - Locate LoadLibraryA</h4>
+    <pre class="post-pre">GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA")</pre>
+    <p class="muted leading-relaxed">Retrieves the memory address of LoadLibraryA - the legitimate Windows function for loading DLLs. Since kernel32.dll loads at a consistent base address across processes, this address is reliable and predictable.</p>
+
+    <h4 class="post-h3">Step 6 - CreateRemoteThread()</h4>
+    <pre class="post-pre">CreateRemoteThread(hProcess, NULL, 0, loadLibraryAddr, allocatedAddr, 0, NULL)</pre>
+    <p class="muted leading-relaxed">Creates a new execution thread inside the target process that calls LoadLibraryA. The Windows Loader takes over - reads the DLL, parses its PE headers, maps all sections into memory, resolves the IAT, fixes relocations, and calls DllMain. The malicious DLL is now fully executing inside the trusted host process.</p>
+
+    <h3 class="post-h2">Live Demonstration</h3>
+    <p class="muted leading-relaxed">The following demonstration was performed inside an isolated Windows 10 virtual machine. The injected DLL contains only a <code class="post-code">MessageBox()</code> call - proving injection worked without performing any harmful action.</p>
+    <p class="muted leading-relaxed"><strong style="color:var(--text);">Environment:</strong> Windows 10 (VirtualBox VM) · Process Hacker 2 · Procmon by Sysinternals · A simple DLL displaying a MessageBox</p>
+
+    <h4 class="post-h3">Screenshot 1 - notepad.exe Modules Before Injection</h4>
+    <p class="muted leading-relaxed">Before running the injector, I opened Process Hacker and checked notepad.exe's loaded modules. At this point malicious_dll.dll is completely absent - this is the clean baseline before any injection occurs.</p>
+    <figure class="post-figure">
+      <img src="../public/blog/ss1_before.png" alt="notepad.exe modules before injection - no malicious_dll.dll present" class="post-img" />
+      <figcaption>notepad.exe (PID 6072) modules tab - clean state before injection. malicious_dll.dll is not present.</figcaption>
+    </figure>
+
+    <h4 class="post-h3">Screenshot 2 - Injector Running in PowerShell</h4>
+    <p class="muted leading-relaxed">With notepad open and Process Hacker watching, I ran the injector from an Administrator PowerShell terminal. Every API call executed and returned success.</p>
+    <figure class="post-figure">
+      <img src="../public/blog/ss2_powershell.png" alt="PowerShell terminal showing injector output" class="post-img" />
+      <figcaption>PowerShell output: notepad.exe found at PID 8964 to OpenProcess succeeded to VirtualAllocEx allocated 56 bytes at 0x000002488900000 to WriteProcessMemory wrote the DLL path to LoadLibraryA located at 0x00007ffd05340800 to CreateRemoteThread created the remote thread.</figcaption>
+    </figure>
+
+    <h4 class="post-h3">Screenshot 3 - Proof of Injection: The Popup</h4>
+    <p class="muted leading-relaxed">Immediately after CreateRemoteThread executed, this appeared on screen. The MessageBox is being rendered by code executing inside notepad.exe. Process Hacker is visible in the background with notepad.exe highlighted as the host process.</p>
+    <figure class="post-figure">
+      <img src="../public/blog/ss3_popup.png" alt="DLL Injected Successfully popup with Process Hacker in background" class="post-img" />
+      <figcaption>"DLL Injected Successfully!" - rendered by malicious code executing inside notepad.exe. The injection succeeded.</figcaption>
+    </figure>
+
+    <h4 class="post-h3">Screenshot 4 - notepad.exe Modules After Injection</h4>
+    <p class="muted leading-relaxed">While the popup was still on screen I checked the Process Hacker modules tab for notepad.exe again. malicious_dll.dll is now clearly present - notice it has no Description field, unlike every legitimate DLL in the list. This is a detection signal.</p>
+    <figure class="post-figure">
+      <img src="../public/blog/ss4_after.png" alt="notepad.exe modules after injection showing malicious_dll.dll loaded" class="post-img" />
+      <figcaption>malicious_dll.dll now loaded at 0x7ffcfadc0000 (124 KB) inside notepad.exe - no Description field, unlike all other legitimate DLLs in the list.</figcaption>
+    </figure>
+
+    <h4 class="post-h3">Screenshot 5 - Procmon Capturing OS-Level Events</h4>
+    <p class="muted leading-relaxed">Procmon captured the complete sequence of events from the operating system's perspective, filtered to notepad.exe during the injection window.</p>
+    <figure class="post-figure">
+      <img src="../public/blog/ss5_procmon.png" alt="Procmon output showing Thread Create, CreateFile, Load Image and Thread Exit events" class="post-img" />
+      <figcaption>Procmon: Thread Create to CreateFile (accessing malicious_dll.dll) to CreateFileMapping to Load Image to Thread Exit. The Windows Loader process captured live.</figcaption>
+    </figure>
+
+    <h3 class="post-h2">What This Means for Detection</h3>
+    <ul class="post-list">
+      <li><strong style="color:var(--text);">Cross-process memory operations</strong> - VirtualAllocEx or WriteProcessMemory targeting another process is immediately suspicious. Legitimate software rarely writes into other processes' memory spaces.</li>
+      <li><strong style="color:var(--text);">Remote thread creation</strong> - CreateRemoteThread spawning a thread inside a separate legitimate process is a strong behavioral indicator EDR tools specifically monitor.</li>
+      <li><strong style="color:var(--text);">DLL loaded from unusual paths</strong> - Legitimate Windows DLLs load from System32 or known application directories. A DLL loading from Desktop or Downloads is a significant red flag.</li>
+      <li><strong style="color:var(--text);">Missing metadata</strong> - Every legitimate Windows DLL has a description, a verified publisher, and is digitally signed. A DLL with no description stands out immediately - as visible in Screenshot 4.</li>
+      <li><strong style="color:var(--text);">Memory not backed by a file on disk</strong> - For advanced techniques like reflective injection, EDR tools look for executable memory regions with no corresponding file on disk.</li>
+    </ul>
+
+    <h3 class="post-h2">Summary</h3>
+    <p class="muted leading-relaxed">DLL injection forces a trusted running process to load and execute a malicious DLL using legitimate Windows APIs - OpenProcess, VirtualAllocEx, WriteProcessMemory, and CreateRemoteThread - to write a DLL path into a target process's memory and create a remote thread that calls LoadLibraryA.</p>
+    <p class="muted leading-relaxed">The result is malicious code running inside a trusted process, inheriting its privileges, and hiding behind its identity.</p>
+    <p class="muted leading-relaxed">Detection relies on behavioral monitoring - watching for cross-process memory writes, remote thread creation, DLLs loading from unusual locations, and missing digital signatures. Signatures and file hashes are insufficient on their own because the technique abuses entirely legitimate Windows functionality.</p>
+    <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:.4rem;">
+      <span class="tag">Endpoint Security</span><span class="tag">Windows Internals</span><span class="tag">DLL Injection</span><span class="tag">Malware Analysis</span><span class="tag">Threat Detection</span><span class="tag">Blue Team</span><span class="tag">EDR</span>
+    </div>
+
+  </div>
+</template>
+
 <footer class="app-footer">
   <div class="app-container footer-inner">
     <div class="footer-row">
@@ -153,11 +265,44 @@
 </script>
 <script>
 (function(){
-  var cards=document.querySelectorAll(".blog-card"),expand=document.getElementById("blog-expand"),titleEl=document.getElementById("blog-expand-title"),bodyEl=document.getElementById("blog-expand-body"),closeBtn=document.getElementById("blog-expand-close");
-  function openBlog(id,title){var tpl=document.getElementById("blog-"+id);if(!tpl)return;titleEl.textContent=title;bodyEl.innerHTML="";bodyEl.appendChild(tpl.content.cloneNode(true));expand.hidden=false;expand.scrollIntoView({behavior:"smooth",block:"nearest"});}
-  function closeBlog(){expand.hidden=true;bodyEl.innerHTML="";}
-  cards.forEach(function(card){var id=card.getAttribute("data-blog"),title=card.querySelector(".blog-title")?.textContent||"Post";card.addEventListener("click",function(){openBlog(id,title);});card.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();openBlog(id,title);}});});
-  closeBtn.addEventListener("click",closeBlog);
+  var cards   = document.querySelectorAll('.blog-card');
+  var modal   = document.getElementById('blog-modal');
+  var titleEl = document.getElementById('modal-title');
+  var bodyEl  = document.getElementById('modal-body');
+  var closeBtn= document.getElementById('modal-close');
+
+  function openModal(id, title) {
+    var tpl = document.getElementById('blog-' + id);
+    if (!tpl) return;
+    titleEl.textContent = title;
+    bodyEl.innerHTML = '';
+    bodyEl.appendChild(tpl.content.cloneNode(true));
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    modal.scrollTop = 0;
+    closeBtn.focus();
+  }
+  function closeModal() {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  cards.forEach(function(card) {
+    var id    = card.getAttribute('data-blog');
+    var title = card.querySelector('.blog-title') ? card.querySelector('.blog-title').textContent : 'Post';
+    card.addEventListener('click', function() { openModal(id, title); });
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(id, title); }
+    });
+  });
+
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !modal.hidden) closeModal();
+  });
 })();
 </script>
 </body></html>
