@@ -453,7 +453,7 @@ a:hover { color: var(--accent-2); }
 .thumb-mark { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: 0.82rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.85); padding: 7px 13px; border-radius: var(--r-full); border: 1px solid rgba(var(--accent-rgb), 0.28); background: rgba(var(--accent-rgb), 0.12); }
 .blog-meta    { padding: 1rem; flex: 1; }
 .blog-tag     { display: inline-flex; padding: 0.22rem 0.55rem; border-radius: var(--r-full); font-size: 0.73rem; color: #ffd1e3; background: rgba(var(--accent-rgb), 0.12); border: 1px solid rgba(var(--accent-rgb), 0.22); }
-.blog-title   { margin-top: 0.7rem; font-size: 0.97rem; line-height: 1.4; color: var(--text); font-weight: 600; }
+.blog-title   { margin-top: 0.7rem; font-size: 1.0rem; line-height: 1.4; color: var(--accent-2); font-weight: 700; }
 .blog-excerpt { margin-top: 0.55rem; font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
 .blog-expand { border: 1px solid var(--border); border-radius: var(--r-lg); padding: 1.5rem; background: rgba(18,18,24,0.80); box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.10); }
 .blog-expand-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: 0.9rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
@@ -545,4 +545,123 @@ a:hover { color: var(--accent-2); }
 @media print {
   body { background: #fff; color: #000; }
   .app-nav, .app-footer, .no-print { display: none !important; }
+}
+
+/* ---------- Blog post expanded content ---------- */
+.post-h2 {
+  font-size: 1.05rem; font-weight: 700; color: var(--text);
+  margin-top: 0.25rem; margin-bottom: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border-dim);
+}
+.post-h3 {
+  font-size: 0.88rem; font-weight: 600; color: var(--accent-2);
+  margin-top: 1rem; margin-bottom: 0.35rem;
+}
+.post-list {
+  padding-left: 1.2rem; list-style: disc;
+  display: grid; gap: 0.45rem; margin-top: 0.5rem;
+}
+.post-list li { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+.post-pre {
+  background: rgba(0,0,0,0.35); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.6rem 0.9rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+  color: #7ce2a5; overflow-x: auto; margin: 0.5rem 0;
+}
+.post-code {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+  color: #7ce2a5; background: rgba(0,0,0,0.3);
+  padding: 0.1rem 0.35rem; border-radius: 4px;
+}
+.mt-2 { margin-top: 0.5rem; }
+
+/* ---------- Full-page blog modal ---------- */
+.blog-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--bg);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.blog-modal[hidden] { display: none; }
+
+.blog-modal-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+  width: 100%;
+}
+
+.blog-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-dim);
+  padding: 1.1rem 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.blog-modal-title {
+  font-size: clamp(1.2rem, 3vw, 1.7rem);
+  font-weight: 700;
+  color: var(--accent-2);
+  line-height: 1.25;
+  flex: 1;
+}
+
+.blog-modal-body { padding-bottom: 2rem; }
+
+/* Post content layout */
+.post-content {
+  display: grid;
+  gap: 1.5rem;
+}
+.post-disclaimer {
+  padding: .75rem 1rem;
+  border-radius: 8px;
+  background: rgba(255,193,7,0.08);
+  border: 1px solid rgba(255,193,7,0.22);
+  font-size: .85rem;
+  color: #ffd166;
+  line-height: 1.6;
+}
+.post-figure {
+  margin: 0.5rem 0;
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+}
+.post-figure.centered {
+  justify-items: center;
+  text-align: center;
+}
+.post-img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: block;
+}
+.post-figure figcaption {
+  font-size: 0.78rem;
+  color: var(--subtle);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* Blog card title */
+.blog-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent-2);
+  line-height: 1.35;
+  margin: 0.4rem 0 0.5rem;
 }
