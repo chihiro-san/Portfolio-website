@@ -8,6 +8,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/main.css" />
+  <style>
+    .post-content p,
+    .post-content li,
+    .post-list li {
+      font-size: .92rem !important;
+      line-height: 1.85 !important;
+      text-align: justify !important;
+    }
+    .post-content h3.post-h2,
+    .post-content h4.post-h3 {
+      text-align: left !important;
+    }
+    .post-content figcaption {
+      font-size: .78rem !important;
+      text-align: center !important;
+    }
+  </style>
 </head>
 <body>
 <header class="app-nav">
@@ -63,9 +80,9 @@
       <p class="mt-2 muted text-sm">Click a card to read the full post.</p>
       <div class="blog-grid">
         <article class="blog-card" data-blog="b1" role="button" tabindex="0" aria-label="Open DLL Injection post">
-          <div class="blog-thumb"><div class="thumb-inner"><div class="thumb-mark">DLL</div></div></div>
+          <div class="blog-thumb"><div class="thumb-inner"><div class="thumb-mark">EDR</div></div></div>
           <div class="blog-meta">
-            <span class="blog-tag">Windows Internals</span>
+            <span class="blog-tag">Endponit Security</span>
             <h3 class="blog-title">DLL Injection: How Attackers Execute Code in Trusted Windows Processes</h3>
             <p class="blog-excerpt">A step-by-step breakdown of classic DLL injection using Windows APIs, with a live demonstration inside an isolated VM - including real screenshots of every stage.</p>
             <div style="margin-top:.75rem;display:flex;flex-wrap:wrap;gap:.4rem;">
@@ -108,7 +125,6 @@
       <li>Modular architecture - components can be updated independently without rebuilding everything</li>
       <li>Code reuse - developers write functionality once and every program that needs it simply loads it</li>
     </ul>
-    <p class="muted leading-relaxed">That elegance, however, also creates a surface that attackers have been exploiting for decades.</p>
 
     <h3 class="post-h2">What is DLL Injection?</h3>
     <p class="muted leading-relaxed">DLL injection is the technique of forcing a legitimate running process to load a DLL it never intended to load. An attacker manipulates a trusted running process from the outside, writing a malicious DLL into its memory space and forcing it to execute that code.</p>
@@ -196,15 +212,15 @@
     <ul class="post-list">
       <li><strong style="color:var(--text);">Cross-process memory operations</strong> - VirtualAllocEx or WriteProcessMemory targeting another process is immediately suspicious. Legitimate software rarely writes into other processes' memory spaces.</li>
       <li><strong style="color:var(--text);">Remote thread creation</strong> - CreateRemoteThread spawning a thread inside a separate legitimate process is a strong behavioral indicator EDR tools specifically monitor.</li>
-      <li><strong style="color:var(--text);">DLL loaded from unusual paths</strong> - Legitimate Windows DLLs load from System32 or known application directories. A DLL loading from Desktop or Downloads is a significant red flag.</li>
+      <li><strong style="color:var(--text);">DLL loaded from unusual paths</strong> - Legitimate Windows DLLs load from System32 or known application directories. A DLL loading outside of System32 or known application directories is suspicious.</li>
       <li><strong style="color:var(--text);">Missing metadata</strong> - Every legitimate Windows DLL has a description, a verified publisher, and is digitally signed. A DLL with no description stands out immediately - as visible in Screenshot 4.</li>
       <li><strong style="color:var(--text);">Memory not backed by a file on disk</strong> - For advanced techniques like reflective injection, EDR tools look for executable memory regions with no corresponding file on disk.</li>
     </ul>
 
     <h3 class="post-h2">Summary</h3>
-    <p class="muted leading-relaxed">DLL injection forces a trusted running process to load and execute a malicious DLL using legitimate Windows APIs - OpenProcess, VirtualAllocEx, WriteProcessMemory, and CreateRemoteThread - to write a DLL path into a target process's memory and create a remote thread that calls LoadLibraryA.</p>
+    <p class="muted leading-relaxed">DLL injection forces a trusted running process to load and execute a malicious DLL using legitimate Windows APIs - OpenProcess, VirtualAllocEx, WriteProcessMemory, and CreateRemoteThread to write a DLL path into a target process's memory and create a remote thread that calls LoadLibraryA.</p>
     <p class="muted leading-relaxed">The result is malicious code running inside a trusted process, inheriting its privileges, and hiding behind its identity.</p>
-    <p class="muted leading-relaxed">Detection relies on behavioral monitoring - watching for cross-process memory writes, remote thread creation, DLLs loading from unusual locations, and missing digital signatures. Signatures and file hashes are insufficient on their own because the technique abuses entirely legitimate Windows functionality.</p>
+    <p class="muted leading-relaxed">Detection relies on behavioral monitoring, watching for cross-process memory writes, remote thread creation, DLLs loading from unusual locations, and missing digital signatures. Signatures and file hashes are insufficient on their own because the technique abuses entirely legitimate Windows functionality.</p>
     <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:.4rem;">
       <span class="tag">Endpoint Security</span><span class="tag">Windows Internals</span><span class="tag">DLL Injection</span><span class="tag">Malware Analysis</span><span class="tag">Threat Detection</span><span class="tag">Blue Team</span><span class="tag">EDR</span>
     </div>
